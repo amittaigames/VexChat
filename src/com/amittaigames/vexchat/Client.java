@@ -9,6 +9,12 @@ public class Client extends Thread {
 	private InetAddress ip;
 	private int port;
 	private DatagramSocket socket;
+	private String name;
+
+	private static final int SEND_MSG = 1;
+	private static final int SEND_USR = 2;
+
+	private int sendMode = SEND_MSG;
 
 	public Client(String ip, int port) {
 		try {
@@ -27,8 +33,22 @@ public class Client extends Thread {
 	private void handlePacket(String[] args) {
 		if (args[0].equals("/c/")) {
 			if (args[1].equals("OK")) {
-				Window.log("Connected!");
+				getUsernameForServer();
+			} else {
+				Window.log("Unable to connect!");
 			}
+		} else if (args[0].equals("/cu/")) {
+			if (args[1].equals("OK")) {
+				Window.log("Connection successful!");
+				return;
+			} else if (args[1].equals("USER_EXIST")) {
+				Window.log("Username already exists");
+			}
+			getUsernameForServer();
+		} else if (args[0].equals("/s/")) {
+			Window.log("[SERVER] " + args[1]);
+		} else if (args[0].equals("/m/")) {
+			Window.log("[" + args[1] + "] " + args[2]);
 		}
 	}
 
@@ -51,7 +71,13 @@ public class Client extends Thread {
 	}
 
 	public void sendMessage(String msg) {
-		// Send message from chat
+		if (sendMode == SEND_MSG) {
+			sendPacket("/m/~" + name + "~" + msg);
+		} else if (sendMode == SEND_USR) {
+			sendPacket("/cu/~" + msg);
+			this.name = msg;
+			sendMode = SEND_MSG;
+		}
 	}
 
 	public void sendPacket(String msg) {
@@ -61,6 +87,11 @@ public class Client extends Thread {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void getUsernameForServer() {
+		sendMode = SEND_USR;
+		Window.log("Please enter a username");
 	}
 
 	public InetAddress getIP() {

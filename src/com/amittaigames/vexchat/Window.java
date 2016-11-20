@@ -5,6 +5,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Window {
 
@@ -33,8 +35,7 @@ public class Window {
 		log.setBorder(new EmptyBorder(5, 5, 5, 5));
 		log.setEditable(false);
 		log.setFont(new Font("Courier", Font.PLAIN, 14));
-		log.append("Vex Chat v0.1\n");
-		log.append("Connecting...\n");
+		log.append("Vex Chat v0.1\n\n");
 		panel.add(log);
 
 		JTextField msg = new JTextField();
@@ -75,7 +76,9 @@ public class Window {
 	}
 
 	public static void log(String msg) {
-		log.append(msg + "\n");
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+		String date = sdf.format(new Date());
+		log.append("[" + date + "] " + msg + "\n");
 	}
 
 }
