@@ -2,6 +2,7 @@ package com.amittaigames.vexchat;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -12,6 +13,7 @@ public class Window {
 
 	private static JFrame frame;
 	private static JTextArea log;
+	private static JScrollPane scroll;
 
 	private static Client client;
 
@@ -34,9 +36,17 @@ public class Window {
 		log.setBounds(10, 10, frame.getWidth() - 25, frame.getHeight() - 75);
 		log.setBorder(new EmptyBorder(5, 5, 5, 5));
 		log.setEditable(false);
+		log.setLineWrap(true);
+		DefaultCaret caret = (DefaultCaret)log.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		log.setFont(new Font("Courier", Font.PLAIN, 14));
 		log.append("Vex Chat v0.1\n\n");
-		panel.add(log);
+
+		scroll = new JScrollPane(log);
+		scroll.setBounds(10, 10, frame.getWidth() - 25, frame.getHeight() - 75);
+		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		panel.add(scroll);
 
 		JTextField msg = new JTextField();
 		msg.setBounds(7, 10 + frame.getHeight() - 70, frame.getWidth() - 110, 30);
