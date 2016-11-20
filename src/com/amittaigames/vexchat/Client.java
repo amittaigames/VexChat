@@ -10,16 +10,18 @@ public class Client extends Thread {
 	private int port;
 	private DatagramSocket socket;
 
-	public static void main(String[] args) {
+	public Client(String ip, int port) {
 		try {
-			Client client = new Client();
-			client.ip = InetAddress.getByName("localhost");
-			client.port = 12098;
-			client.socket = new DatagramSocket();
-			client.start();
+			this.ip = InetAddress.getByName(ip);
+			this.port = port;
+			this.socket = new DatagramSocket();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static void main(String[] args) {
+		Login.init();
 	}
 
 	private void handlePacket(String[] args) {
@@ -55,5 +57,4 @@ public class Client extends Thread {
 			e.printStackTrace();
 		}
 	}
-
 }
