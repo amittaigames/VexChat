@@ -27,13 +27,14 @@ public class Client extends Thread {
 	private void handlePacket(String[] args) {
 		if (args[0].equals("/c/")) {
 			if (args[1].equals("OK")) {
-				System.out.println("Connected!");
+				Window.log("Connected!");
 			}
 		}
 	}
 
 	public void run() {
-		sendMessage("/c/~");
+		Window.init(this);
+		sendPacket("/c/~");
 
 		while (true) {
 			try {
@@ -50,6 +51,10 @@ public class Client extends Thread {
 	}
 
 	public void sendMessage(String msg) {
+		// Send message from chat
+	}
+
+	public void sendPacket(String msg) {
 		try {
 			DatagramPacket packet = new DatagramPacket(msg.getBytes(), msg.getBytes().length, ip, port);
 			socket.send(packet);
@@ -57,4 +62,17 @@ public class Client extends Thread {
 			e.printStackTrace();
 		}
 	}
+
+	public InetAddress getIP() {
+		return ip;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public DatagramSocket getSocket() {
+		return socket;
+	}
+
 }

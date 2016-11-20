@@ -24,7 +24,7 @@ public class Server extends Thread {
 
 	private void handlePacket(String[] args, DatagramPacket packet) {
 		if (args[0].equals("/c/")) {
-			sendData("/c/~OK", packet.getAddress(), packet.getPort());
+			sendPacket("/c/~OK", packet.getAddress(), packet.getPort());
 			System.out.println("Connection from " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
 		}
 	}
@@ -44,7 +44,7 @@ public class Server extends Thread {
 		}
 	}
 
-	public void sendData(String msg, InetAddress ip, int port) {
+	public void sendPacket(String msg, InetAddress ip, int port) {
 		try {
 			DatagramPacket packet = new DatagramPacket(msg.getBytes(), msg.getBytes().length, ip, port);
 			socket.send(packet);

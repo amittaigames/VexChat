@@ -34,6 +34,7 @@ public class Login {
 					Integer.parseInt(txtPort.getText())
 			);
 			client.start();
+			frame.dispose();
 		});
 		panel.add(conn);
 
