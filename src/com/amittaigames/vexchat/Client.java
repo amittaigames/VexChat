@@ -31,13 +31,21 @@ public class Client extends Thread {
 	}
 
 	private void handlePacket(String[] args) {
+		//
+		//	/c/
+		//
 		if (args[0].equals("/c/")) {
 			if (args[1].equals("OK")) {
 				getUsernameForServer();
 			} else {
 				Window.log("Unable to connect!");
 			}
-		} else if (args[0].equals("/cu/")) {
+		}
+
+		//
+		//	/cu/
+		//
+		else if (args[0].equals("/cu/")) {
 			if (args[1].equals("OK")) {
 				Window.log("Connection successful!");
 				return;
@@ -45,14 +53,35 @@ public class Client extends Thread {
 				Window.log("Username already exists");
 			}
 			getUsernameForServer();
-		} else if (args[0].equals("/s/")) {
+		}
+
+		//
+		//	/s/
+		//
+		else if (args[0].equals("/s/")) {
 			Window.log("[SERVER] " + args[1]);
-		} else if (args[0].equals("/m/")) {
+		}
+
+		//
+		//	/m/
+		//
+		else if (args[0].equals("/m/")) {
 			Window.log("[" + args[1] + "] " + args[2]);
 		}
 	}
 
 	public void run() {
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			@Override
+			public void run() {
+				try {
+					sendPacket("/x/~" + name);
+				} catch (Exception e) {
+					// Do nothing because it should work if a connetion exists
+				}
+			}
+		});
+
 		Window.init(this);
 		sendPacket("/c/~");
 
@@ -71,12 +100,39 @@ public class Client extends Thread {
 	}
 
 	public void sendMessage(String msg) {
-		if (sendMode == SEND_MSG) {
-			sendPacket("/m/~" + name + "~" + msg);
-		} else if (sendMode == SEND_USR) {
-			sendPacket("/cu/~" + msg);
-			this.name = msg;
-			sendMode = SEND_MSG;
+		if (msg.startsWith("/")) {
+			handleCommand(msg.replace("/", ""));
+		} else {
+			if (sendMode == SEND_MSG) {
+				sendPacket("/m/~" + name + "~" + msg);
+			} else if (sendMode == SEND_USR) {
+				sendPacket("/cu/~" + msg);
+				this.name = msg;
+				sendMode = SEND_MSG;
+			}
+		}
+	}
+
+	public void handleCommand(String cmd) {
+		//
+		//	exit
+		//
+		if (cmd.equals("exit")) {
+			System.exit(0);
+		}
+
+		//
+		//	online
+		//
+		else if (cmd.equals("online")) {
+			sendPacket("/cmd/~ONLINE");
+		}
+
+		//
+		//	Invalid
+		//
+		else {
+			Window.log("[CMD] Invalid command");
 		}
 	}
 

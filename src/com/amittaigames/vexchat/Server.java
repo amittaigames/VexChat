@@ -3,7 +3,9 @@ package com.amittaigames.vexchat;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class Server extends Thread {
@@ -27,10 +29,18 @@ public class Server extends Thread {
 	}
 
 	private void handlePacket(String[] args, DatagramPacket packet) {
+		//
+		//	/c/
+		//
 		if (args[0].equals("/c/")) {
 			sendPacket("/c/~OK", packet.getAddress(), packet.getPort());
-			System.out.println("Connection from " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
-		} else if (args[0].equals("/cu/")) {
+			System.out.println(time() + "Connection from " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
+		}
+
+		//
+		//	/cu/
+		//
+		else if (args[0].equals("/cu/")) {
 			if (userExists(args[1])) {
 				sendPacket("/cu/~USER_EXIST", packet.getAddress(), packet.getPort());
 			} else {
@@ -38,9 +48,53 @@ public class Server extends Thread {
 				sendPacket("/s/~Welcome to the server " + args[1] + "!", packet.getAddress(), packet.getPort());
 				sendToAll("/s/~" + args[1] + " joined the chat room");
 				users.add(new User(packet.getAddress(), packet.getPort(), args[1]));
+				System.out.println(time() + "User '" + args[1] + "' joined the chat room");
 			}
-		} else if (args[0].equals("/m/")) {
+		}
+
+		//
+		//	/m/
+		//
+		else if (args[0].equals("/m/")) {
 			sendToAll("/m/~" + args[1] + "~" + args[2]);
+			System.out.println(time() + "[" + args[1] + "] " + args[2]);
+		}
+
+		//
+		//	/x/
+		//
+		else if (args[0].equals("/x/")) {
+			int id = getIDByUsername(args[1]);
+			if (id != -1) {
+				users.remove(id);
+				sendToAll("/s/~" + args[1] + " left the chat room");
+				System.out.println(time() + args[1] + " disconnected");
+			} else {
+				System.err.println(time() + "UDNE (EXIT): " + args[1]);
+			}
+		}
+
+		//
+		//	/cmd/
+		//
+		else if (args[0].equals("/cmd/")) {
+			if (args[1].equals("ONLINE")) {
+				int size = users.size();
+				sendPacket("/s/~" + size + " user(s) online", packet.getAddress(), packet.getPort());
+			}
+		}
+
+		//
+		//	Unknown
+		//
+		else {
+			StringBuilder sb = new StringBuilder();
+			for (String s : args) {
+				sb.append(s).append("~");
+			}
+			String upacket = sb.toString();
+			System.err.println(time() + "Invalid packet from " + packet.getAddress().getHostAddress() + ":" +
+					packet.getPort() + " - '" + upacket);
 		}
 	}
 
@@ -74,6 +128,12 @@ public class Server extends Thread {
 		}
 	}
 
+	private String time() {
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+		String date = sdf.format(new Date());
+		return "[" + date + "] ";
+	}
+
 	private boolean userExists(String name) {
 		for (User u : users) {
 			if (u.getUsername().equals(name)) {
@@ -81,6 +141,15 @@ public class Server extends Thread {
 			}
 		}
 		return false;
+	}
+
+	private int getIDByUsername(String name) {
+		for (int i = 0; i < users.size(); i++) {
+			if (users.get(i).getUsername().equals(name)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 }

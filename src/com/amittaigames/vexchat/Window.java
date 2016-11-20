@@ -6,6 +6,8 @@ import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -25,7 +27,7 @@ public class Window {
 		frame.setResizable(false);
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		frame.setBackground(new Color(0, 210, 108));
+		//frame.setBackground(new Color(0, 210, 108));
 
 		JPanel panel = new JPanel();
 		panel.setBorder(new EmptyBorder(5, 5, 5, 5));
