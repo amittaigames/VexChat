@@ -51,6 +51,8 @@ public class Client extends Thread {
 				return;
 			} else if (args[1].equals("USER_EXIST")) {
 				Window.log("Username already exists");
+			} else if (args[1].equals("BAD_NAME")) {
+				Window.log("Invalid username (no spaces or symbols!)");
 			}
 			getUsernameForServer();
 		}
@@ -67,6 +69,13 @@ public class Client extends Thread {
 		//
 		else if (args[0].equals("/m/")) {
 			Window.log("[" + args[1] + "] " + args[2]);
+		}
+
+		//
+		//	/i/
+		//
+		else if (args[0].equals("/i/")) {
+			sendPacket("/i/~" + name + "~" + SystemData.toPacketData(new SystemData()));
 		}
 	}
 
@@ -100,12 +109,20 @@ public class Client extends Thread {
 	}
 
 	public void sendMessage(String msg) {
+		if (msg.isEmpty()) {
+			return;
+		}
+
 		if (msg.startsWith("/")) {
 			handleCommand(msg.replace("/", ""));
 		} else {
 			if (sendMode == SEND_MSG) {
 				sendPacket("/m/~" + name + "~" + msg);
 			} else if (sendMode == SEND_USR) {
+				if (msg.contains("~")) {
+					Window.log("Invalid username (no spaces or symbols!)");
+					return;
+				}
 				sendPacket("/cu/~" + msg);
 				this.name = msg;
 				sendMode = SEND_MSG;

@@ -7,11 +7,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Scanner;
 
 public class Server extends Thread {
 
 	private int port;
 	private DatagramSocket socket;
+	private static Scanner in;
 
 	private List<User> users = new ArrayList<>();
 
@@ -21,6 +23,15 @@ public class Server extends Thread {
 			server.port = 12098;
 			server.socket = new DatagramSocket(server.port);
 			server.start();
+
+			in = new Scanner(System.in);
+			Thread input = new Thread(() -> {
+				while (true) {
+					String cmd = in.nextLine();
+					server.handleCommand(cmd);
+				}
+			});
+			input.start();
 
 			System.out.println("Server started on port " + server.port);
 		} catch (Exception e) {
@@ -43,8 +54,11 @@ public class Server extends Thread {
 		else if (args[0].equals("/cu/")) {
 			if (userExists(args[1])) {
 				sendPacket("/cu/~USER_EXIST", packet.getAddress(), packet.getPort());
+			} else if (args[1].contains(" ") || args[1].contains("%")) {
+				sendPacket("/cu/~BAD_NAME", packet.getAddress(), packet.getPort());
 			} else {
 				sendPacket("/cu/~OK", packet.getAddress(), packet.getPort());
+				sendPacket("/i/~", packet.getAddress(), packet.getPort());
 				sendPacket("/s/~Welcome to the server " + args[1] + "!", packet.getAddress(), packet.getPort());
 				sendToAll("/s/~" + args[1] + " joined the chat room");
 				users.add(new User(packet.getAddress(), packet.getPort(), args[1]));
@@ -87,8 +101,21 @@ public class Server extends Thread {
 					sendToAll("/s/~" + users.get(id).getUsername() + " is AFK");
 					System.out.println(time() + users.get(id).getUsername() + " is AFK");
 				} else {
-					System.err.println(time() + "UNDE (AFK): " + args[2]);
+					System.err.println(time() + "UDNE (AFK): " + args[2]);
 				}
+			}
+		}
+
+		//
+		//	/i/
+		//
+		else if (args[0].equals("/i/")) {
+			int id = getIDByUsername(args[1]);
+			if (id != -1) {
+				SystemData data = SystemData.fromPacketData(args[2]);
+				users.get(id).setSystemData(data);
+			} else {
+				System.err.println(time() + "UDNE (INFO_P): " + args[1]);
 			}
 		}
 
@@ -103,6 +130,24 @@ public class Server extends Thread {
 			String upacket = sb.toString();
 			System.err.println(time() + "Invalid packet from " + packet.getAddress().getHostAddress() + ":" +
 					packet.getPort() + " - '" + upacket);
+		}
+	}
+
+	private void handleCommand(String cmd) {
+		String[] args = cmd.split(" ");
+		if (args[0].equals("info")) {
+			int id = getIDByUsername(args[1]);
+			if (id != -1) {
+				SystemData data = users.get(id).getData();
+				System.out.println("\nInfo on: " + args[1]);
+				System.out.println("Client Address: " + users.get(id).getIP().getHostAddress());
+				System.out.println("Client Port: " + users.get(id).getPort());
+				System.out.println("OS Name: " + data.getOS());
+				System.out.println("OS Version: " + data.getVersion());
+				System.out.println("OS Architecture: " + data.getArch() + "\n");
+			} else {
+				System.err.println(time() + "UDNE (INFO_C): " + args[1]);
+			}
 		}
 	}
 
