@@ -129,6 +129,13 @@ public class Client extends Thread {
 		}
 
 		//
+		//	afk
+		//
+		else if (cmd.equals("afk")) {
+			sendPacket("/cmd/~AFK~" + name);
+		}
+
+		//
 		//	Invalid
 		//
 		else {

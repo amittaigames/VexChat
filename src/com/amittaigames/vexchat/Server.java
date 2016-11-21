@@ -81,6 +81,14 @@ public class Server extends Thread {
 			if (args[1].equals("ONLINE")) {
 				int size = users.size();
 				sendPacket("/s/~" + size + " user(s) online", packet.getAddress(), packet.getPort());
+			} else if (args[1].equals("AFK")) {
+				int id = getIDByUsername(args[2]);
+				if (id != -1) {
+					sendToAll("/s/~" + users.get(id).getUsername() + " is AFK");
+					System.out.println(time() + users.get(id).getUsername() + " is AFK");
+				} else {
+					System.err.println(time() + "UNDE (AFK): " + args[2]);
+				}
 			}
 		}
 
