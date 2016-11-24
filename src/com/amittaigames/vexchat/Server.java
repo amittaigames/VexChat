@@ -17,6 +17,9 @@ public class Server extends Thread {
 
 	private List<User> users = new ArrayList<>();
 
+	public static final int VERSION = 6;
+	public static final String S_VERSION = "0.6";
+
 	public static void main(String[] args) {
 		try {
 			Server server = new Server();
@@ -34,6 +37,7 @@ public class Server extends Thread {
 			input.start();
 
 			System.out.println("Server started on port " + server.port);
+			System.out.println("Version " + S_VERSION + " (" + VERSION + ")");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -44,8 +48,13 @@ public class Server extends Thread {
 		//	/c/
 		//
 		if (args[0].equals("/c/")) {
-			sendPacket("/c/~OK", packet.getAddress(), packet.getPort());
-			System.out.println(time() + "Connection from " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
+			if (Integer.parseInt(args[1]) < VERSION) {
+				sendPacket("/c/~VERSION~" + S_VERSION, packet.getAddress(), packet.getPort());
+				System.out.println(time() + "(v" + args[1] + ") Connection from " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
+			} else {
+				sendPacket("/c/~OK", packet.getAddress(), packet.getPort());
+				System.out.println(time() + "Connection from " + packet.getAddress().getHostAddress() + ":" + packet.getPort());
+			}
 		}
 
 		//
@@ -103,6 +112,15 @@ public class Server extends Thread {
 				} else {
 					System.err.println(time() + "UDNE (AFK): " + args[2]);
 				}
+			} else if (args[1].equals("LS")) {
+				StringBuilder sb = new StringBuilder();
+				for (int i = 0; i < users.size(); i++) {
+					sb.append(users.get(i).getUsername());
+					if (i != users.size() - 1) {
+						sb.append(", ");
+					}
+				}
+				sendPacket("/s/~Users online: " + sb.toString(), packet.getAddress(), packet.getPort());
 			}
 		}
 

@@ -11,8 +11,11 @@ public class Client extends Thread {
 	private DatagramSocket socket;
 	private String name;
 
+	public static final int VERSION = 6;
+	public static final String S_VERSION = "0.6";
 	private static final int SEND_MSG = 1;
 	private static final int SEND_USR = 2;
+	private static boolean connected = false;
 
 	private int sendMode = SEND_MSG;
 
@@ -37,7 +40,11 @@ public class Client extends Thread {
 		if (args[0].equals("/c/")) {
 			if (args[1].equals("OK")) {
 				getUsernameForServer();
-			} else {
+			}
+			else if (args[1].equals("VERSION")) {
+				Window.log("Your version (" + S_VERSION + ") is not compatible with the server (" + args[2] + ")");
+			}
+			else {
 				Window.log("Unable to connect!");
 			}
 		}
@@ -48,6 +55,7 @@ public class Client extends Thread {
 		else if (args[0].equals("/cu/")) {
 			if (args[1].equals("OK")) {
 				Window.log("Connection successful!");
+				connected = true;
 				return;
 			} else if (args[1].equals("USER_EXIST")) {
 				Window.log("Username already exists");
@@ -84,7 +92,8 @@ public class Client extends Thread {
 			@Override
 			public void run() {
 				try {
-					sendPacket("/x/~" + name);
+					if (connected)
+						sendPacket("/x/~" + name);
 				} catch (Exception e) {
 					// Do nothing because it should work if a connetion exists
 				}
@@ -92,7 +101,7 @@ public class Client extends Thread {
 		});
 
 		Window.init(this);
-		sendPacket("/c/~");
+		sendPacket("/c/~" + VERSION);
 
 		while (true) {
 			try {
@@ -117,7 +126,8 @@ public class Client extends Thread {
 			handleCommand(msg.replace("/", ""));
 		} else {
 			if (sendMode == SEND_MSG) {
-				sendPacket("/m/~" + name + "~" + msg);
+				if (connected)
+					sendPacket("/m/~" + name + "~" + msg);
 			} else if (sendMode == SEND_USR) {
 				if (msg.contains("~")) {
 					Window.log("Invalid username (no spaces or symbols!)");
@@ -150,6 +160,13 @@ public class Client extends Thread {
 		//
 		else if (cmd.equals("afk")) {
 			sendPacket("/cmd/~AFK~" + name);
+		}
+		
+		//
+		//	list
+		//
+		else if (cmd.equals("list")) {
+			sendPacket("/cmd/~LS");
 		}
 
 		//

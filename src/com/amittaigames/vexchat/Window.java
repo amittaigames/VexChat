@@ -42,7 +42,7 @@ public class Window {
 		DefaultCaret caret = (DefaultCaret)log.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		log.setFont(new Font("Courier", Font.PLAIN, 14));
-		log.append("Vex Chat v0.1\n\n");
+		log.append("Vex Chat v" + Client.S_VERSION + "\n\n");
 
 		scroll = new JScrollPane(log);
 		scroll.setBounds(10, 10, frame.getWidth() - 25, frame.getHeight() - 75);
